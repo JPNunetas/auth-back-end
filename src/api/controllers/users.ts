@@ -2,6 +2,8 @@ import { Request, Response, Router } from "express";
 
 import client from "@/db/client";
 
+import { userExists } from "@/utils/userExists";
+
 export const getUsers = async (req: Request, res: Response) => {
     const query: string = 'SELECT * FROM view_all_users';
     const result = await client.query(query);
@@ -95,13 +97,23 @@ export const createUser = async (req: Request, res: Response) => {
         return;
     }
 
-    const query: string = `SELECT * FROM create_user('${username}', '${email}', '', '', '', '${password}', 'user', '3')`;
-    const result = await client.query(query);
-    const data = result.rows[0];
+    const user = await userExists(email);
+    
+    if(!user) {
+        const query: string = `SELECT * FROM create_user('${username}', '${email}', '', '', '', '${password}', 'user', '3')`;
+        const result = await client.query(query);
+        const data = result.rows[0];
 
-    res.status(200).send({
-        status: 200,
-        message: 'User created!',
-        data
+        res.status(200).send({
+            status: 200,
+            message: 'User created!',
+            data
+        });
+        return;
+    }
+
+    res.status(400).send({
+        status: 400,
+        message: 'User with that email already exists!'
     });
 }
