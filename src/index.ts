@@ -8,6 +8,8 @@ import usersRoutes from './api/routes/users';
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
+
 app.use("/users", usersRoutes);
 
 app.listen(port, () => {
